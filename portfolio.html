@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rifdan Dermawan — Full-Stack Developer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  :root{
+    --bg:#F7F6F1;
+    --bg-alt:#EFEDE5;
+    --ink:#191C1A;
+    --ink-soft:#565A52;
+    --accent:#3F6B54;
+    --accent-soft:rgba(63,107,84,0.10);
+    --wood:#8B6F4E;
+    --line:rgba(25,28,26,0.13);
+    --font-display:'Space Grotesk', sans-serif;
+    --font-body:'IBM Plex Sans', sans-serif;
+    --font-mono:'IBM Plex Mono', monospace;
+    --max:1120px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--font-body);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  a{color:inherit;}
+  ::selection{background:var(--accent); color:var(--bg);}
+
+  :focus-visible{
+    outline:2px solid var(--accent);
+    outline-offset:3px;
+  }
+
+  .wrap{
+    max-width:var(--max);
+    margin:0 auto;
+    padding:0 32px;
+  }
+
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:12px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--accent);
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:18px;
+    height:1px;
+    background:var(--accent);
+    display:inline-block;
+  }
+
+  /* NAV */
+  nav{
+    position:sticky; top:0; z-index:50;
+    background:rgba(247,246,241,0.86);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  nav .wrap{
+    display:flex; align-items:center; justify-content:space-between;
+    height:64px;
+  }
+  .logo{
+    font-family:var(--font-display);
+    font-weight:600;
+    font-size:17px;
+    letter-spacing:-0.01em;
+  }
+  .logo span{color:var(--accent);}
+  .navlinks{
+    display:flex; gap:28px;
+    font-family:var(--font-mono);
+    font-size:13px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+  }
+  .navlinks a{text-decoration:none; color:var(--ink-soft); transition:color .2s;}
+  .navlinks a:hover{color:var(--accent);}
+  @media(max-width:640px){ .navlinks{display:none;} }
+
+  /* HERO */
+  .hero{
+    padding:88px 0 64px;
+    display:grid;
+    grid-template-columns:1.1fr 0.9fr;
+    gap:40px;
+    align-items:center;
+  }
+  @media(max-width:900px){
+    .hero{grid-template-columns:1fr; padding:56px 0 40px;}
+  }
+  .hero h1{
+    font-family:var(--font-display);
+    font-weight:600;
+    font-size:clamp(38px, 5.6vw, 64px);
+    line-height:1.06;
+    letter-spacing:-0.02em;
+    margin:18px 0 22px;
+  }
+  .hero h1 em{
+    font-style:normal;
+    color:var(--accent);
+  }
+  .hero p.lede{
+    font-size:17px;
+    color:var(--ink-soft);
+    max-width:46ch;
+    margin-bottom:32px;
+  }
+  .cta-row{display:flex; gap:14px; flex-wrap:wrap;}
+  .btn{
+    font-family:var(--font-mono);
+    font-size:13px;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    text-decoration:none;
+    padding:13px 22px;
+    border-radius:2px;
+    display:inline-block;
+    border:1px solid var(--ink);
+    transition:all .2s ease;
+  }
+  .btn-primary{background:var(--ink); color:var(--bg);}
+  .btn-primary:hover{background:var(--accent); border-color:var(--accent);}
+  .btn-ghost{background:transparent; color:var(--ink);}
+  .btn-ghost:hover{background:var(--accent-soft); border-color:var(--accent); color:var(--accent);}
+
+  .stage{
+    position:relative;
+    height:420px;
+    border:1px solid var(--line);
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px) 0 0/100% 40px,
+      var(--bg-alt);
+    border-radius:2px;
+    overflow:hidden;
+  }
+  .stage canvas{display:block; width:100%; height:100%; cursor:grab;}
+  .stage canvas:active{cursor:grabbing;}
+  .stage-label{
+    position:absolute; bottom:12px; left:14px;
+    font-family:var(--font-mono);
+    font-size:11px;
+    color:var(--ink-soft);
+    letter-spacing:0.04em;
+    pointer-events:none;
+  }
+  @media(max-width:900px){ .stage{height:320px;} }
+
+  /* NOW STRIP */
+  .now{
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    background:var(--bg-alt);
+    padding:26px 0;
+  }
+  .now .wrap{
+    display:flex; align-items:baseline; gap:18px; flex-wrap:wrap;
+  }
+  .now p{
+    font-size:15px;
+    color:var(--ink-soft);
+  }
+  .now p strong{color:var(--ink); font-weight:600;}
+
+  /* SECTION */
+  section.block{padding:88px 0;}
+  section.block h2{
+    font-family:var(--font-display);
+    font-weight:600;
+    font-size:clamp(26px,3.4vw,36px);
+    letter-spacing:-0.01em;
+    margin:14px 0 40px;
+  }
+
+  /* WORK */
+  .case{
+    border:1px solid var(--line);
+    background:var(--bg-alt);
+    border-radius:2px;
+    padding:40px;
+    display:grid;
+    grid-template-columns:1.3fr 1fr;
+    gap:36px;
+  }
+  @media(max-width:800px){ .case{grid-template-columns:1fr;} }
+  .case h3{
+    font-family:var(--font-display);
+    font-size:24px;
+    font-weight:600;
+    margin-bottom:6px;
+  }
+  .case .role{
+    font-family:var(--font-mono);
+    font-size:12px;
+    color:var(--wood);
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    margin-bottom:18px;
+    display:block;
+  }
+  .case ul{list-style:none;}
+  .case li{
+    position:relative;
+    padding-left:20px;
+    margin-bottom:12px;
+    font-size:15px;
+    color:var(--ink-soft);
+  }
+  .case li::before{
+    content:"";
+    position:absolute; left:0; top:9px;
+    width:7px; height:1px;
+    background:var(--accent);
+  }
+  .stats{
+    display:flex; flex-direction:column; gap:22px;
+    border-left:1px solid var(--line);
+    padding-left:30px;
+  }
+  @media(max-width:800px){ .stats{border-left:none; border-top:1px solid var(--line); padding-left:0; padding-top:24px; flex-direction:row; flex-wrap:wrap; gap:28px;} }
+  .stat .num{
+    font-family:var(--font-mono);
+    font-size:22px;
+    color:var(--accent);
+    display:block;
+  }
+  .stat .label{
+    font-size:12px;
+    color:var(--ink-soft);
+    font-family:var(--font-mono);
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+  }
+
+  .case-note{
+    margin-top:18px;
+    font-family:var(--font-mono);
+    font-size:13px;
+    color:var(--ink-soft);
+    border:1px solid var(--line);
+    background:var(--bg);
+    padding:16px 18px;
+    border-radius:2px;
+  }
+
+  /* STACK */
+  .chips{
+    display:flex; flex-wrap:wrap; gap:10px;
+  }
+  .chip{
+    font-family:var(--font-mono);
+    font-size:13px;
+    padding:9px 16px;
+    border:1px solid var(--line);
+    border-radius:2px;
+    color:var(--ink-soft);
+    background:var(--bg-alt);
+    transition:all .2s;
+  }
+  .chip:hover{border-color:var(--accent); color:var(--accent);}
+
+  .thesis{
+    margin-top:44px;
+    padding:26px 28px;
+    border-left:2px solid var(--accent);
+    background:var(--accent-soft);
+    font-size:15px;
+    color:var(--ink-soft);
+  }
+  .thesis strong{color:var(--ink);}
+
+  /* CONTACT */
+  .contact-grid{
+    display:grid;
+    grid-template-columns:1.2fr 1fr;
+    gap:40px;
+  }
+  @media(max-width:800px){ .contact-grid{grid-template-columns:1fr;} }
+  .contact-grid h2{margin-bottom:16px;}
+  .contact-grid p.lede{color:var(--ink-soft); max-width:44ch; margin-bottom:28px;}
+  .links{list-style:none;}
+  .links li{border-top:1px solid var(--line); padding:16px 0;}
+  .links li:last-child{border-bottom:1px solid var(--line);}
+  .links a{
+    text-decoration:none;
+    display:flex; justify-content:space-between; align-items:center;
+    font-family:var(--font-mono);
+    font-size:14px;
+  }
+  .links .k{color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.05em; font-size:12px;}
+  .links .v{color:var(--ink); transition:color .2s;}
+  .links a:hover .v{color:var(--accent);}
+
+  footer{
+    border-top:1px solid var(--line);
+    padding:28px 0;
+  }
+  footer .wrap{
+    display:flex; justify-content:space-between; align-items:center;
+    font-family:var(--font-mono);
+    font-size:12px;
+    color:var(--ink-soft);
+    flex-wrap:wrap; gap:8px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="logo">rifdan<span>.</span>dev</div>
+    <div class="navlinks">
+      <a href="#work">Work</a>
+      <a href="#stack">Stack</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero wrap">
+  <div>
+    <div class="eyebrow">Full-stack developer — Bandung, ID</div>
+    <h1>Rifdan builds the <em>whole stack</em>, then keeps it running.</h1>
+    <p class="lede">Teknik Informatika student at Universitas Teknologi Bandung. For over a year, primary developer of the Saung Angklung Udjo web platform — database, backend, frontend, and the server it all runs on.</p>
+    <div class="cta-row">
+      <a href="#work" class="btn btn-primary">See the work</a>
+      <a href="#contact" class="btn btn-ghost">Get in touch</a>
+    </div>
+  </div>
+  <div class="stage" id="stage">
+    <span class="stage-label">drag to rotate — frontend / backend / database</span>
+  </div>
+</header>
+
+<div class="now">
+  <div class="wrap">
+    <div class="eyebrow">Now</div>
+    <p><strong>Recovering angklung-udjo.co.id</strong> from a subdomain injection attack and a domain migration to primary — while shipping a new ticket promo microsite the same week.</p>
+  </div>
+</div>
+
+<section class="block wrap" id="work">
+  <div class="eyebrow">Selected work</div>
+  <h2>Saung Angklung Udjo — platform rebuild &amp; operation</h2>
+
+  <div class="case">
+    <div>
+      <span class="role">Full-stack developer · Jan 2025 — present</span>
+      <h3>From WordPress to a system that runs a live venue</h3>
+      <ul>
+        <li>Rebuilt the site from WordPress into Laravel 12, with Blade, Tailwind CSS, MySQL, and Vite, deployed on cPanel.</li>
+        <li>Built the online booking system end to end: a multi-step flow, dynamic QRIS payments, WhatsApp integration, and an admin confirmation panel.</li>
+        <li>Shipped bilingual (ID/EN) heritage pages, a partner-logo admin module, and PWA support for offline-friendly browsing.</li>
+        <li>Owns the infrastructure too — SSL, CDN, PageSpeed fixes, and incident response when the server breaks at 2am.</li>
+      </ul>
+      <div class="case-note">Started as a 6-month internship in the digital strategic division. Still the one who gets paged when something goes down.</div>
+    </div>
+    <div class="stats">
+      <div class="stat"><span class="num">Laravel 12</span><span class="label">Core framework</span></div>
+      <div class="stat"><span class="num">1</span><span class="label">Developer, full stack</span></div>
+      <div class="stat"><span class="num">6mo → ongoing</span><span class="label">Internship to production owner</span></div>
+    </div>
+  </div>
+
+  <div class="thesis">
+    <strong>Undergraduate thesis, in progress:</strong> a Laravel-based ticket reservation system for SAU with Midtrans payment integration, replacing the venue's manual WhatsApp booking flow end to end.
+  </div>
+</section>
+
+<section class="block wrap" id="stack">
+  <div class="eyebrow">Stack</div>
+  <h2>Tools used in production, not just in tutorials</h2>
+  <div class="chips">
+    <span class="chip">PHP / Laravel</span>
+    <span class="chip">MySQL</span>
+    <span class="chip">Tailwind CSS</span>
+    <span class="chip">Alpine.js</span>
+    <span class="chip">Vite</span>
+    <span class="chip">JavaScript</span>
+    <span class="chip">Next.js</span>
+    <span class="chip">Flutter / Dart</span>
+    <span class="chip">cPanel / DevOps</span>
+    <span class="chip">Git</span>
+  </div>
+</section>
+
+<section class="block wrap" id="contact">
+  <div class="contact-grid">
+    <div>
+      <div class="eyebrow">Contact</div>
+      <h2>Open to full-stack roles and freelance builds.</h2>
+      <p class="lede">Reply fastest by email. Replace the placeholders below with your real handles before this goes live.</p>
+    </div>
+    <ul class="links">
+      <li><a href="mailto:your.email@example.com"><span class="k">Email</span><span class="v">your.email@example.com</span></a></li>
+      <li><a href="https://github.com/rifdanhd" target="_blank" rel="noopener"><span class="k">GitHub</span><span class="v">github.com/rifdanhd</span></a></li>
+      <li><a href="https://linkedin.com/in/yourusername" target="_blank" rel="noopener"><span class="k">LinkedIn</span><span class="v">linkedin.com/in/yourusername</span></a></li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Rifdan Dermawan</span>
+    <span>Built with Laravel, mostly. This page, with three.js.</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  const stage = document.getElementById('stage');
+  const w = stage.clientWidth, h = stage.clientHeight;
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(42, w/h, 0.1, 100);
+  camera.position.set(0, 0.6, 6.2);
+
+  const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+  renderer.setSize(w, h);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  stage.appendChild(renderer.domElement);
+
+  const group = new THREE.Group();
+  scene.add(group);
+
+  const accent = 0x3F6B54;
+  const wood = 0x8B6F4E;
+  const ink = 0x191C1A;
+
+  const layerDefs = [
+    { y: 1.15, color: accent, opacity: 0.9 },
+    { y: 0.0,  color: wood,   opacity: 0.75 },
+    { y: -1.15,color: ink,    opacity: 0.55 }
+  ];
+
+  layerDefs.forEach(function(def){
+    const geo = new THREE.PlaneGeometry(2.6, 1.5, 6, 6);
+    const mat = new THREE.MeshBasicMaterial({
+      color: def.color,
+      wireframe: true,
+      transparent: true,
+      opacity: def.opacity
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.rotation.x = -Math.PI/2.6;
+    mesh.position.y = def.y;
+    group.add(mesh);
+
+    const edgeGeo = new THREE.EdgesGeometry(new THREE.PlaneGeometry(2.6,1.5));
+    const edgeMat = new THREE.LineBasicMaterial({color: def.color, transparent:true, opacity: Math.min(def.opacity+0.15,1)});
+    const edges = new THREE.LineSegments(edgeGeo, edgeMat);
+    edges.rotation.x = -Math.PI/2.6;
+    edges.position.y = def.y;
+    group.add(edges);
+  });
+
+  // connecting verticals
+  for (let i=-1; i<=1; i+=2){
+    for (let j=-1; j<=1; j+=2){
+      const points = layerDefs.map(function(def){
+        const localX = i*1.3;
+        const localZ = j*0.75;
+        return new THREE.Vector3(localX, def.y + Math.sin(-Math.PI/2.6)*0, localZ);
+      });
+      // approximate vertical connector using top and bottom layer only
+    }
+  }
+  const connGeo = new THREE.BufferGeometry();
+  const connPositions = [];
+  const corners = [[-1.3,-0.75],[1.3,-0.75],[1.3,0.75],[-1.3,0.75]];
+  corners.forEach(function(c){
+    connPositions.push(c[0], layerDefs[0].y - 0.35, c[1]);
+    connPositions.push(c[0], layerDefs[2].y + 0.35, c[1]);
+  });
+  connGeo.setAttribute('position', new THREE.Float32BufferAttribute(connPositions, 3));
+  const connMat = new THREE.LineBasicMaterial({color: 0x191C1A, transparent:true, opacity:0.15});
+  const connLines = new THREE.LineSegments(connGeo, connMat);
+  group.add(connLines);
+
+  group.rotation.x = 0.15;
+  group.rotation.y = -0.5;
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  let dragging = false, lastX = 0, lastY = 0;
+  let velX = 0, velY = 0.002;
+
+  function pointerDown(x,y){ dragging = true; lastX = x; lastY = y; }
+  function pointerMove(x,y){
+    if(!dragging) return;
+    const dx = x - lastX, dy = y - lastY;
+    group.rotation.y += dx * 0.006;
+    group.rotation.x += dy * 0.006;
+    velX = dy * 0.0006;
+    velY = dx * 0.0006;
+    lastX = x; lastY = y;
+  }
+  function pointerUp(){ dragging = false; }
+
+  renderer.domElement.addEventListener('mousedown', function(e){ pointerDown(e.clientX, e.clientY); });
+  window.addEventListener('mousemove', function(e){ pointerMove(e.clientX, e.clientY); });
+  window.addEventListener('mouseup', pointerUp);
+
+  renderer.domElement.addEventListener('touchstart', function(e){
+    const t = e.touches[0]; pointerDown(t.clientX, t.clientY);
+  }, {passive:true});
+  renderer.domElement.addEventListener('touchmove', function(e){
+    const t = e.touches[0]; pointerMove(t.clientX, t.clientY);
+  }, {passive:true});
+  renderer.domElement.addEventListener('touchend', pointerUp);
+
+  function animate(){
+    requestAnimationFrame(animate);
+    if(!dragging){
+      if(!reduceMotion){
+        group.rotation.y += velY;
+        group.rotation.x += velX;
+      }
+      velX *= 0.94;
+      velY += (0.0018 - velY) * 0.02;
+    }
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  window.addEventListener('resize', function(){
+    const nw = stage.clientWidth, nh = stage.clientHeight;
+    camera.aspect = nw/nh;
+    camera.updateProjectionMatrix();
+    renderer.setSize(nw, nh);
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,273 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─────────────────────────────────────────────────────────────
+   CSS CUSTOM PROPERTIES — STOKT MOTION STUDIO AESTHETIC
+   Dark default: #0a0a0a / rich warm studio dark
+   Light default: #f5f0e9 / warm organic cream paper
+   ───────────────────────────────────────────────────────────── */
+
+@layer base {
+  :root {
+    --background:         38 30% 94%;        /* Cream #f5f0e9 */
+    --foreground:         0 0% 4%;           /* Deep Black #0a0a0a */
+    --card:               40 33% 98%;        /* #fcfbfa */
+    --card-foreground:    0 0% 4%;
+    --popover:            40 33% 98%;
+    --popover-foreground: 0 0% 4%;
+    --primary:            14 100% 55%;       /* Vermillion Orange #ff4d1d */
+    --primary-foreground: 0 0% 100%;
+    --secondary:          38 20% 88%;        /* Warm Gray */
+    --secondary-foreground: 0 0% 10%;
+    --muted:              38 15% 90%;
+    --muted-foreground:   0 0% 35%;
+    --accent:             14 100% 55%;
+    --accent-foreground:  0 0% 100%;
+    --destructive:        0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border:             0 0% 0% / 0.1;
+    --input:              0 0% 0% / 0.1;
+    --ring:               14 100% 55%;
+    --radius:             0.75rem;           /* Refined studio curve */
+
+    /* Surface tokens */
+    --bg-page:            #f5f0e9;
+    --bg-surface:         #efe5d4;
+    --bg-card:            #fcfbfa;
+    --color-border:       rgba(10, 10, 10, 0.08);
+    --color-border-hover: rgba(10, 10, 10, 0.22);
+    --color-accent:       #f02806;           /* Studio Vermillion */
+    --color-emerald:      #059669;
+    --shadow-studio:      0 10px 30px -10px rgba(0,0,0,0.06);
+    --shadow-studio-hover:0 20px 40px -15px rgba(0,0,0,0.12);
+  }
+
+  .dark {
+    --background:         0 0% 4%;           /* Deep Studio Black #0a0a0a */
+    --foreground:         40 20% 96%;        /* Off-white #f5f0e9 */
+    --card:               0 0% 7%;           /* Surface #121212 */
+    --card-foreground:    40 20% 96%;
+    --popover:            0 0% 7%;
+    --popover-foreground: 40 20% 96%;
+    --primary:            14 100% 55%;       /* Vermillion Orange #ff4d1d */
+    --primary-foreground: 0 0% 100%;
+    --secondary:          0 0% 12%;          /* Studio Slate */
+    --secondary-foreground: 40 20% 96%;
+    --muted:              0 0% 14%;
+    --muted-foreground:   0 0% 65%;
+    --accent:             14 100% 55%;
+    --accent-foreground:  0 0% 100%;
+    --destructive:        0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border:             0 0% 100% / 0.08;
+    --input:              0 0% 100% / 0.08;
+    --ring:               14 100% 55%;
+
+    /* Surface tokens */
+    --bg-page:            #0a0a0a;
+    --bg-surface:         #121212;
+    --bg-card:            #171717;
+    --color-border:       rgba(255, 255, 255, 0.08);
+    --color-border-hover: rgba(255, 255, 255, 0.2);
+    --color-accent:       #ff4d1d;
+    --color-emerald:      #10b981;
+    --shadow-studio:      0 10px 30px -10px rgba(0,0,0,0.5);
+    --shadow-studio-hover:0 20px 40px -15px rgba(255,77,29,0.15);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   BASE RESET
+   ───────────────────────────────────────────────────────────── */
+
+@layer base {
+  * { 
+    @apply border-border; 
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  html { 
+    scroll-behavior: smooth; 
+  }
+
+  body {
+    background-color: var(--bg-page);
+    color: hsl(var(--foreground));
+    @apply antialiased font-sans overflow-x-hidden;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  ::selection {
+    background-color: var(--color-accent);
+    color: #ffffff;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar            { width: 8px; }
+  ::-webkit-scrollbar-track      { background: var(--bg-page); }
+  ::-webkit-scrollbar-thumb      { background: var(--color-border); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--color-accent); }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   STOKT STUDIO UTILITIES & ANIMATIONS
+   ───────────────────────────────────────────────────────────── */
+
+/* Studio Grid Lines */
+.bg-studio-grid {
+  background-size: 40px 40px;
+}
+
+:root .bg-studio-grid,
+:not(.dark) .bg-studio-grid {
+  background-image:
+    linear-gradient(to right, rgba(10, 10, 10, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(10, 10, 10, 0.04) 1px, transparent 1px);
+}
+
+.dark .bg-studio-grid {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+}
+
+/* Studio Glass Card */
+.studio-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-studio);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.studio-card:hover {
+  border-color: var(--color-border-hover);
+  box-shadow: var(--shadow-studio-hover);
+  transform: translateY(-2px);
+}
+
+/* Studio Badge */
+.studio-badge {
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  border: 1px solid var(--color-border);
+  background-color: var(--bg-card);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Gradient Text Accent */
+.text-studio-gradient {
+  background: linear-gradient(135deg, hsl(var(--foreground)) 0%, var(--color-accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-orange-gradient {
+  background: linear-gradient(135deg, #ff6a37 0%, #ff4d1d 50%, #e2af67 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Kinetic Marquee Ticker with iOS Safari Hardware Acceleration */
+@-webkit-keyframes marquee {
+  0% {
+    -webkit-transform: translate3d(0%, 0, 0);
+    transform: translate3d(0%, 0, 0);
+  }
+  100% {
+    -webkit-transform: translate3d(-100%, 0, 0);
+    transform: translate3d(-100%, 0, 0);
+  }
+}
+
+@keyframes marquee {
+  0% {
+    -webkit-transform: translate3d(0%, 0, 0);
+    transform: translate3d(0%, 0, 0);
+  }
+  100% {
+    -webkit-transform: translate3d(-100%, 0, 0);
+    transform: translate3d(-100%, 0, 0);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  flex-shrink: 0;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+  -webkit-animation: marquee 30s linear infinite;
+  animation: marquee 30s linear infinite;
+}
+
+/* Only pause on hover on devices that actually support cursor hover (not mobile touch screens) */
+@media (hover: hover) and (pointer: fine) {
+  .marquee-row:hover .animate-marquee,
+  .animate-marquee:hover {
+    -webkit-animation-play-state: paused;
+    animation-play-state: paused;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────
+   LENIS SMOOTH SCROLLING SUPPORT
+   ─────────────────────────────────────────────────────────── */
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   MOBILE OPTIMIZATIONS
+   ───────────────────────────────────────────────────────────── */
+
+/* Hide scrollbar on mobile for cleaner look */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar { width: 0px; }
+  
+  /* Prevent horizontal overflow from marquee on mobile */
+  .marquee-row { overflow: hidden; }
+
+  /* Tighter section padding on mobile */
+  section { 
+    scroll-margin-top: 60px; 
+  }
+}
+
+/* Support for safe area insets on notched phones */
+@supports (padding: env(safe-area-inset-bottom)) {
+  body {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}

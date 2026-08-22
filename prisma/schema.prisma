@@ -1,0 +1,70 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Project {
+  id             String          @id @default(uuid())
+  slug           String          @unique
+  title          String
+  subtitle       String
+  role           String
+  period         String
+  description    String
+  heroImage      String
+  techStack      String          // JSON array of strings
+  githubUrl      String?
+  liveUrl        String?
+  featured       Boolean         @default(false)
+  order          Int             @default(0)
+  
+  // Case Study Content fields
+  overview       String
+  challenge      String
+  research       String
+  planning       String
+  design         String
+  architecture   String
+  database       String
+  frontend       String
+  backend        String
+  deployment     String
+  performance    String
+  seo            String
+  lessonsLearned String
+  timeline       String
+  gallery        String          // JSON array of URLs
+
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  metrics        ProjectMetric[]
+}
+
+model ProjectMetric {
+  id        String  @id @default(uuid())
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  label     String
+  value     String
+}
+
+model Experience {
+  id           String   @id @default(uuid())
+  company      String
+  role         String
+  period       String
+  location     String
+  description  String
+  achievements String   // JSON array of strings
+  techStack    String   // JSON array of strings
+  isCurrent    Boolean  @default(false)
+  order        Int      @default(0)
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
