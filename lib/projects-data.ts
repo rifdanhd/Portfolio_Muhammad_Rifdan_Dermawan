@@ -164,7 +164,7 @@ export const projectsData: Project[] = [
       "A world-class Next.js 15 App Router portfolio showcasing React Three Fiber 3D interactions, Framer Motion transitions, custom Command Palette, MDX technical blog, and sub-second performance.",
     heroImage: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1600&auto=format&fit=crop",
     techStack: ["Next.js 15", "TypeScript", "React Three Fiber", "Tailwind CSS", "Framer Motion", "MDX"],
-    githubUrl: "https://github.com/rifdanhd/portfolio",
+    githubUrl: "https://github.com/rifdanhd/Portfolio_Muhammad_Rifdan_Dermawan",
     liveUrl: "https://rifdandermawan.dev",
     featured: true,
     metrics: [
