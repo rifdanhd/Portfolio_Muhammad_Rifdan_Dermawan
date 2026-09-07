@@ -20,21 +20,47 @@ interface NavbarProps {
 export default function Navbar({ onOpenCmdk }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const [lastScrollY, setLastScrollY] = useState(0);
   const activeSection = useActiveSection(sectionIds);
   const { t } = useLanguage();
 
-  // Deteksi scroll untuk efek dinamis
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 20) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
+      const currentScrollY = window.scrollY;
+
+      setScrolled(currentScrollY > 20);
+
+      // Jangan sembunyikan navbar kalau mobile menu lagi kebuka
+      if (mobileMenuOpen) {
+        setLastScrollY(currentScrollY);
+        return;
       }
+
+      if (currentScrollY < 80) {
+        // Selalu tampil di dekat top halaman
+        setHidden(false);
+      } else if (currentScrollY > lastScrollY) {
+        // Scroll ke bawah -> sembunyikan
+        setHidden(true);
+      } else {
+        // Scroll ke atas -> tampilkan
+        setHidden(false);
+      }
+
+      setLastScrollY(currentScrollY);
     };
-    window.addEventListener("scroll", handleScroll);
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [lastScrollY, mobileMenuOpen]);
+
+  // Auto-close mobile menu kalau navbar ke-hide
+  useEffect(() => {
+    if (hidden && mobileMenuOpen) {
+      setMobileMenuOpen(false);
+    }
+  }, [hidden, mobileMenuOpen]);
 
   const navItems = [
     { id: "projects", label: t.nav.projects },
@@ -57,59 +83,56 @@ export default function Navbar({ onOpenCmdk }: NavbarProps) {
   };
 
   return (
-    <header className="fixed top-3 inset-x-0 z-50 max-w-7xl mx-auto px-3 sm:px-5 lg:px-8 pointer-events-none">
+    <motion.header
+      animate={{ y: hidden ? "-150%" : "0%" }}
+      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+      className="fixed top-8 sm:top-10 inset-x-3 sm:inset-x-6 lg:inset-x-10 z-50 pointer-events-none"
+    >
       <div
-        className={`pointer-events-auto flex items-center justify-between gap-2 sm:gap-4 h-12 sm:h-14 px-3 sm:px-6 rounded-2xl transition-all duration-300 backdrop-blur-2xl border ${
+        className={`pointer-events-auto relative flex items-center justify-between gap-3 sm:gap-6 h-16 sm:h-20 px-4 sm:px-8 rounded-2xl transition-all duration-300 backdrop-blur-2xl backdrop-saturate-50 border overflow-hidden ${
           scrolled
-            ? "bg-white/80 dark:bg-white/15 border-white/80 dark:border-white/20 text-zinc-900 dark:text-white shadow-xl shadow-zinc-950/10"
-            : "bg-white/60 dark:bg-white/10 border-white/60 dark:border-white/15 text-zinc-900 dark:text-white shadow-lg shadow-zinc-950/5"
+            ? "bg-black/50 border-white/15 text-white shadow-2xl shadow-black/30"
+            : "bg-black/40 border-white/10 text-white shadow-xl shadow-black/20"
         }`}
       >
-        {/* Brand / Logo (White Glass Theme) */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" />
+
+        {/* Brand / Logo */}
         <Link
           href="/"
-          className="flex items-center gap-2 group font-bold text-base tracking-tight shrink-0 text-zinc-900 dark:text-white"
+          className="flex items-center gap-2.5 group font-bold text-base tracking-tight shrink-0 text-white"
         >
-          <div className="w-5 h-5 flex items-center justify-center transition-transform duration-300 group-hover:rotate-90">
-            <span className="text-zinc-900 dark:text-white text-base leading-none font-sans font-black">❊</span>
+          <div className="w-7 h-7 flex items-center justify-center transition-transform duration-300 group-hover:rotate-90">
+            <span className="text-white text-xl leading-none font-sans font-black">❊</span>
           </div>
-          <span className="font-mono text-sm font-bold tracking-tight">
+          <span className="font-mono text-base sm:text-lg font-bold tracking-tight">
             rifdan<span className="text-orange-500">.dev</span>
           </span>
         </Link>
 
-        {/* Desktop Nav Items (Transparent White Glass Styling) */}
-        <nav className="hidden xl:flex items-center gap-7 font-mono text-[11px] uppercase tracking-[0.16em]">
+        {/* Desktop Nav Items */}
+        <nav className="hidden xl:flex items-center h-full gap-8 font-mono text-xs uppercase tracking-[0.16em]">
           {navItems.map((item) => {
             const isActive = activeSection === item.id;
             return (
               <button
                 key={item.id}
                 onClick={() => handleScrollTo(item.id)}
-                className={`relative py-1 flex flex-col items-center transition-colors ${
+                className={`flex items-center justify-center text-center py-3 px-3 rounded-xl transition-all ${
                   isActive
-                    ? "text-zinc-900 dark:text-white font-bold"
-                    : "text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white font-medium"
+                    ? "bg-white text-zinc-950 font-bold"
+                    : "text-white hover:bg-white/10"
                 }`}
               >
                 <span>{item.label.toUpperCase()}</span>
-                {isActive ? (
-                  <motion.div
-                    layoutId="stoktActiveDot"
-                    className="w-1.5 h-1.5 rounded-full bg-zinc-900 dark:bg-white mt-1 shadow-xs"
-                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                  />
-                ) : (
-                  <div className="w-1.5 h-1.5 mt-1 opacity-0" />
-                )}
               </button>
             );
           })}
         </nav>
 
-        {/* Right Utility Row (Clean Controls & CTA Button) */}
+        {/* Right Utility Row */}
         <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
-          {/* Utility toggles — hide music on very small screens to save space */}
           <div className="flex items-center gap-0.5 sm:gap-1">
             <LanguageToggle />
             <ThemeToggle />
@@ -120,7 +143,7 @@ export default function Navbar({ onOpenCmdk }: NavbarProps) {
 
           <button
             onClick={() => handleScrollTo("contact")}
-            className="hidden md:flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-zinc-900 text-white dark:bg-[#f5f0e9] dark:text-zinc-950 hover:bg-orange-600 dark:hover:bg-white font-mono text-[11px] font-bold tracking-wider uppercase transition-all shadow-xs"
+            className="hidden md:flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-white text-zinc-950 hover:bg-orange-600 hover:text-white font-mono text-xs font-bold tracking-wider uppercase transition-all shadow-xs"
           >
             <span>{t.nav.contact}</span>
             <ArrowUpRight className="w-3.5 h-3.5" />
@@ -128,7 +151,7 @@ export default function Navbar({ onOpenCmdk }: NavbarProps) {
 
           <Button
             onClick={onOpenCmdk}
-            className="hidden sm:flex items-center gap-1 text-[11px] font-mono font-semibold rounded-xl border border-zinc-300/80 dark:border-white/15 bg-zinc-100/80 dark:bg-white/10 text-zinc-800 dark:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-white/20 h-8 px-3 transition-all backdrop-blur-md"
+            className="hidden sm:flex items-center gap-1 text-[11px] font-mono font-semibold rounded-xl border border-white/15 bg-white/10 text-white hover:bg-white/20 h-8 px-3 transition-all backdrop-blur-md"
           >
             <Command className="w-3 h-3 text-orange-500" />
             <span>⌘K</span>
@@ -137,7 +160,7 @@ export default function Navbar({ onOpenCmdk }: NavbarProps) {
           {/* Mobile / Tablet Menu Toggle */}
           <Button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="xl:hidden text-zinc-900 dark:text-white hover:bg-zinc-200 dark:hover:bg-white/20 border border-zinc-300/80 dark:border-white/15 bg-white/40 dark:bg-white/10 h-8 w-8 p-0 flex items-center justify-center rounded-xl backdrop-blur-md shrink-0"
+            className="xl:hidden text-white hover:bg-white/20 border border-white/15 bg-white/10 h-8 w-8 p-0 flex items-center justify-center rounded-xl backdrop-blur-md shrink-0"
           >
             {mobileMenuOpen ? <X className="w-4 h-4 text-orange-500" /> : <Menu className="w-4 h-4 text-orange-500" />}
           </Button>
@@ -152,9 +175,8 @@ export default function Navbar({ onOpenCmdk }: NavbarProps) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.98 }}
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="pointer-events-auto xl:hidden mt-2 p-3 sm:p-4 rounded-2xl bg-white/98 dark:bg-zinc-900/98 text-zinc-900 dark:text-white backdrop-blur-2xl border border-zinc-200/80 dark:border-white/15 shadow-2xl"
+            className="pointer-events-auto xl:hidden mt-2 p-3 sm:p-4 rounded-2xl bg-black/70 backdrop-saturate-50 text-white backdrop-blur-2xl border border-white/15 shadow-2xl"
           >
-            {/* Nav grid — 2 cols on mobile, 4 cols on sm+ */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 font-mono text-xs">
               {navItems.map((item) => (
                 <button
@@ -162,8 +184,8 @@ export default function Navbar({ onOpenCmdk }: NavbarProps) {
                   onClick={() => handleScrollTo(item.id)}
                   className={`flex items-center justify-between text-left py-2.5 px-3 rounded-xl transition-all ${
                     activeSection === item.id
-                      ? "bg-zinc-900 text-white dark:bg-[#f5f0e9] dark:text-zinc-950 font-bold"
-                      : "text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/10"
+                      ? "bg-white text-zinc-950 font-bold"
+                      : "text-white hover:bg-white/10"
                   }`}
                 >
                   <span className="uppercase tracking-wider text-[10px] sm:text-xs">{item.label}</span>
@@ -172,22 +194,20 @@ export default function Navbar({ onOpenCmdk }: NavbarProps) {
               ))}
             </div>
 
-            {/* Bottom row: music toggle (mobile only) + cmd palette */}
-            <div className="pt-3 mt-3 border-t border-zinc-200/80 dark:border-white/10 flex items-center gap-2">
-              {/* Show MusicToggle here on smallest screens */}
+            <div className="pt-3 mt-3 border-t border-white/10 flex items-center gap-2">
               <div className="xs:hidden flex-shrink-0">
                 <MusicToggle />
               </div>
               <Button
                 onClick={() => { setMobileMenuOpen(false); onOpenCmdk(); }}
-                className="flex-1 flex justify-center items-center gap-2 text-xs font-mono font-semibold rounded-xl border border-zinc-300/80 dark:border-white/15 bg-zinc-100 dark:bg-white/10 text-zinc-900 dark:text-white hover:bg-zinc-200 dark:hover:bg-white/20 h-10 shadow-xs"
+                className="flex-1 flex justify-center items-center gap-2 text-xs font-mono font-semibold rounded-xl border border-white/15 bg-white/10 text-white hover:bg-white/20 h-10 shadow-xs"
               >
                 <Command className="w-3.5 h-3.5 text-orange-500" />
                 <span>Command Palette (⌘K)</span>
               </Button>
               <button
                 onClick={() => handleScrollTo("contact")}
-                className="md:hidden flex-shrink-0 flex items-center gap-1 px-3 py-2 rounded-xl bg-zinc-900 text-white dark:bg-[#f5f0e9] dark:text-zinc-950 font-mono text-[10px] font-bold tracking-wider uppercase transition-all"
+                className="md:hidden flex-shrink-0 flex items-center gap-1 px-3 py-2 rounded-xl bg-white text-zinc-950 font-mono text-[10px] font-bold tracking-wider uppercase transition-all"
               >
                 <span>Contact</span>
                 <ArrowUpRight className="w-3 h-3" />
@@ -196,6 +216,6 @@ export default function Navbar({ onOpenCmdk }: NavbarProps) {
           </motion.div>
         )}
       </AnimatePresence>
-    </header>
+    </motion.header>
   );
 }

@@ -28,13 +28,15 @@ export default function HomePage() {
         <Hero />
         <TickerMarquee />
         <ProjectsSection />
-        <About />
         <Experience />
-        <LayananSection />
+        <About />
+
+       
         <Skills />
         <TechStack />
-        <Achievements />
-        <BlogSection />
+        {/* <Achievements /> */}
+        {/* TODO: uncomment when real blog posts are written */}
+        {/* <BlogSection /> */}
         <ContactSection />
       </main>
 

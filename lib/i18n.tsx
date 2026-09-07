@@ -194,7 +194,7 @@ const en: Translations = {
   },
   experience: {
     badge: "Career Timeline",
-    heading: "Proven Track Record of",
+    heading: "Experience &",
     headingHighlight: "Execution",
     subheading:
       "From academic foundations at Universitas Teknologi Bandung to managing production cloud systems for Saung Angklung Udjo.",
@@ -377,7 +377,7 @@ const id: Translations = {
   },
   experience: {
     badge: "Linimasa Karir",
-    heading: "Rekam Jejak yang Telah Terbukti dalam",
+    heading: "Pengalaman &",
     headingHighlight: "Eksekusi",
     subheading:
       "Dari fondasi akademik di Universitas Teknologi Bandung hingga mengelola sistem cloud produksi untuk Saung Angklung Udjo.",
@@ -522,8 +522,8 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType>({
   language: "en",
   t: en,
-  toggleLanguage: () => {},
-  setLanguage: () => {},
+  toggleLanguage: () => { },
+  setLanguage: () => { },
 });
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {

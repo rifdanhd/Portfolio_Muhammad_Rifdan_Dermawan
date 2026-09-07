@@ -1,196 +1,192 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { motion, Variants } from "framer-motion";
-import { Briefcase, MapPin, CheckCircle2, Sparkles } from "lucide-react";
+import React, { useState } from "react";
+import { motion, AnimatePresence, Variants } from "framer-motion";
+import { ArrowUpRight } from "lucide-react";
 import { experienceData } from "@/lib/experience-data";
-import { getExperiences } from "@/lib/actions/experience";
 import { useLanguage } from "@/lib/i18n";
-import { ExperienceItem } from "@/types";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 
-// ─── Easing ──────────────────────────────────────────────────
 const EXPO_OUT = [0.16, 1, 0.3, 1] as const;
-
-// ─── Variants ────────────────────────────────────────────────
-const lineVariants: Variants = {
-  hidden: { scaleY: 0 },
-  visible: {
-    scaleY: 1,
-    transition: { duration: 1.2, ease: EXPO_OUT },
-  },
-};
-
-const listVariants: Variants = {
-  hidden: {},
-  visible: {
-    transition: { staggerChildren: 0.15, delayChildren: 0.2 },
-  },
-};
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, x: -24 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: { duration: 0.65, ease: EXPO_OUT },
-  },
-};
 
 const headingVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.7, ease: EXPO_OUT },
-  },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: EXPO_OUT } },
+};
+
+const gridVariants: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.12, delayChildren: 0.15 } },
+};
+
+const cardVariants: Variants = {
+  hidden: { opacity: 0, y: 28 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EXPO_OUT } },
 };
 
 const VP = { once: true, amount: 0.1 } as const;
 
+function EyebrowArrow() {
+  return (
+    <svg
+      viewBox="0 0 15 12"
+      className="h-3 w-3 shrink-0 -rotate-90 text-zinc-400 dark:text-zinc-500"
+      aria-hidden="true"
+    >
+      <path
+        d="M3.44.15 1.85 1.65a.83.83 0 0 0 0 1.07l2.86 2.7a.13.13 0 0 1-.12.2H.54A.42.42 0 0 0 0 6.05v1.9c0 .27.24.48.54.48h4.05c.13 0 .2.15.11.24L1.85 11.4c-.21.2-.21.5 0 .7l1.6 1.4a.62.62 0 0 0 .76 0l6.78-6.36a.62.62 0 0 0 0-.9L4.2.13a.62.62 0 0 0-.76 0Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
 export default function Experience() {
   const { t } = useLanguage();
   const reduced = useReducedMotion();
-  const [experiences, setExperiences] = useState<ExperienceItem[]>(experienceData);
 
-  useEffect(() => {
-    getExperiences().then((dbExp) => {
-      if (dbExp && dbExp.length > 0) {
-        setExperiences(dbExp);
-      }
-    });
-  }, []);
+  const experiences = experienceData;
+
+  const [activeIdx, setActiveIdx] = useState<number | null>(null);
+
+  const toggleCard = (idx: number) => {
+    setActiveIdx((prev) => (prev === idx ? null : idx));
+  };
 
   return (
     <section
       id="experience"
-      className="py-24 relative overflow-hidden bg-background border-b border-zinc-200/80 dark:border-zinc-800/80"
+      className="relative mx-2 overflow-hidden rounded-t-3xl border-b border-zinc-800/80 bg-black py-16 sm:mx-4 sm:py-24 lg:mx-6"
     >
-      <div className="max-w-6xl mx-auto px-6 lg:px-8 relative z-10">
-
-        {/* Section Header */}
+      <div className="relative z-10 w-full px-4 sm:px-5 lg:px-6">
+        {/* Header */}
         <motion.div
-          className="max-w-3xl mb-16 space-y-4"
+          className="mb-10 space-y-3 px-1 sm:mb-16 sm:space-y-4 sm:px-2 lg:px-2"
           variants={headingVariants}
           initial={reduced ? false : "hidden"}
           whileInView="visible"
           viewport={VP}
         >
-          <div className="studio-badge text-orange-600 dark:text-orange-400">
-            <Sparkles className="w-3 h-3" />
-            <span>02 / CAREER TIMELINE</span>
-          </div>
-          <h2 className="text-3xl sm:text-5xl font-bold tracking-tight leading-none text-foreground">
-            {t.experience.heading}{" "}
-            <span className="text-orange-gradient">
-              {t.experience.headingHighlight}
+          <div className="flex items-center gap-2 sm:gap-3">
+            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-zinc-500 sm:text-xs">
+              ( Career Journey )
             </span>
+            <EyebrowArrow />
+          </div>
+
+          {/* Mobile: allow natural wrap at a smaller size so it never gets
+              squished unreadable. Desktop: keep it on one line as before. */}
+          <h2
+            className="font-bold leading-[1.1] tracking-tight text-white sm:whitespace-nowrap sm:leading-none"
+            style={{ fontSize: "clamp(1.75rem, 8vw, 3.75rem)" }}
+          >
+            {t.experience.heading}{" "}
+            <span className="text-orange-gradient">{t.experience.headingHighlight}</span>
           </h2>
-          <p className="text-base text-zinc-600 dark:text-zinc-400">
+
+          <p className="max-w-2xl text-sm text-zinc-400 sm:text-base">
             {t.experience.subheading}
           </p>
         </motion.div>
 
-        {/* Studio Timeline Grid */}
-        <div className="relative max-w-4xl mx-auto pl-8 sm:pl-10">
-
-          {/* Animated timeline line */}
-          <motion.div
-            className="absolute left-0 top-0 bottom-0 w-[2px] bg-orange-500/30 dark:bg-orange-500/20 origin-top"
-            variants={lineVariants}
-            initial={reduced ? false : "hidden"}
-            whileInView="visible"
-            viewport={VP}
-          />
-
-          {/* Staggered timeline items */}
-          <motion.div
-            className="space-y-12"
-            variants={listVariants}
-            initial={reduced ? false : "hidden"}
-            whileInView="visible"
-            viewport={VP}
-          >
-            {experiences.map((item, idx) => (
+        <motion.div
+          className="grid grid-cols-1 items-stretch gap-3 sm:grid-cols-2 sm:gap-4"
+          variants={gridVariants}
+          initial={reduced ? false : "hidden"}
+          whileInView="visible"
+          viewport={VP}
+        >
+          {experiences.map((item, idx) => {
+            const isOpen = activeIdx === idx;
+            return (
               <motion.div
                 key={item.id}
-                variants={itemVariants}
-                className="relative"
+                variants={cardVariants}
+                onClick={() => toggleCard(idx)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") toggleCard(idx);
+                }}
+                className="group relative flex h-full cursor-pointer flex-col rounded-2xl border border-zinc-800 bg-black p-5 transition-colors duration-300 hover:bg-zinc-950 hover:border-zinc-700 sm:rounded-3xl sm:p-8"
               >
-                {/* Timeline Connector Box Node */}
-                <div className="absolute -left-[39px] sm:-left-[51px] top-2 z-10 flex items-center justify-center w-7 h-7 rounded-full border border-orange-500/40 bg-zinc-900 text-white shadow-sm">
-                  <span className="text-[10px] font-mono font-semibold text-orange-400">{idx + 1}</span>
+                {/* Meta — stacks on very small screens so long location text
+                    never collides with the period label */}
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-1.5 pr-7 font-mono text-[11px] text-zinc-500 sm:mb-4 sm:flex-nowrap sm:gap-3 sm:pr-10 sm:text-xs">
+                  <span>{item.period}</span>
+                  <span className="truncate text-right">{item.location}</span>
                 </div>
 
-                {/* Job Card Block */}
-                <div className="studio-card p-5 sm:p-8 rounded-2xl sm:rounded-3xl space-y-5 sm:space-y-6">
+                {/* Title — slightly smaller on mobile so long role names don't
+                    force awkward wraps against the corner icon */}
+                <h3 className="mb-1.5 text-xl font-bold leading-tight text-white sm:text-2xl">
+                  {item.role}
+                </h3>
+                <p className="mb-3 font-mono text-xs text-zinc-500 sm:mb-4 sm:text-sm">
+                  {item.company}
+                </p>
 
-                  {/* Meta Row */}
-                  <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-zinc-200/80 dark:border-zinc-800/80 font-mono text-xs">
-                    <span className="font-semibold text-orange-600 dark:text-orange-400 bg-orange-500/10 px-3 py-1 rounded-full border border-orange-500/20">
-                      {item.period}
+                <div className="mb-3 h-6 sm:mb-4">
+                  {item.isCurrent && (
+                    <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 font-mono text-[10px] text-emerald-400">
+                      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+                      {t.experience.currentRole}
                     </span>
-                    {item.isCurrent && (
-                      <span className="flex items-center gap-2 font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
-                        <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-                        {t.experience.currentRole}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Job Title & Org */}
-                  <div className="space-y-1.5">
-                    <h3 className="text-xl sm:text-2xl font-bold text-foreground">
-                      {item.role}
-                    </h3>
-                    <div className="text-sm font-semibold font-mono text-zinc-500 tracking-wide flex items-center gap-2">
-                      <Briefcase className="w-4 h-4 text-orange-500" />
-                      <span>{item.company}</span>
-                      <span>•</span>
-                      <span>{item.location}</span>
-                    </div>
-                  </div>
-
-                  {/* Task Description */}
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed font-sans">
-                    {item.description}
-                  </p>
-
-                  {/* Accomplishments */}
-                  <div className="space-y-2 border-t border-zinc-200/80 dark:border-zinc-800/80 pt-4">
-                    <span className="block text-xs font-mono uppercase tracking-wider text-zinc-400 font-semibold mb-2">
-                      {t.experience.achievements}
-                    </span>
-                    {item.achievements.map((ach, aIdx) => (
-                      <div key={aIdx} className="flex items-start gap-3 text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 font-sans">
-                        <CheckCircle2 className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
-                        <span>{ach}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Technical Stack Tags */}
-                  <div className="flex flex-wrap gap-2 pt-4 border-t border-zinc-200/80 dark:border-zinc-800/80">
-                    {item.techStack.map((tech) => (
-                      <span
-                        key={tech}
-                        className="text-[11px] font-mono bg-zinc-200/60 dark:bg-zinc-900/80 text-zinc-700 dark:text-zinc-300 border border-zinc-300/60 dark:border-zinc-800 px-2.5 py-1 rounded-lg"
-                      >
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
-
+                  )}
                 </div>
 
+                <p className="mb-4 line-clamp-3 text-[13px] leading-relaxed text-zinc-400 sm:mb-5 sm:text-sm">
+                  {item.description}
+                </p>
+
+                {/* Tags — slightly tighter gap/padding on mobile */}
+                <div className="mt-auto flex flex-wrap gap-1.5">
+                  {item.techStack.slice(0, 6).map((tech) => (
+                    <span
+                      key={tech}
+                      className="rounded-full border border-zinc-800 bg-zinc-900/80 px-2 py-0.5 font-mono text-[9px] text-zinc-400 sm:px-2.5 sm:py-1 sm:text-[10px]"
+                    >
+                      {tech}
+                    </span>
+                  ))}
+                  {item.techStack.length > 6 && (
+                    <span className="rounded-full border border-zinc-800 bg-zinc-900/80 px-2 py-0.5 font-mono text-[9px] text-zinc-500 sm:px-2.5 sm:py-1 sm:text-[10px]">
+                      +{item.techStack.length - 6}
+                    </span>
+                  )}
+                </div>
+
+                {/* Expand indicator — pulled in slightly on mobile so it
+                    never sits flush against the rounded corner */}
+                <ArrowUpRight
+                  className={`absolute right-5 top-5 h-4 w-4 text-zinc-600 transition-all duration-300 sm:right-8 sm:top-8 ${
+                    isOpen ? "translate-x-0.5 -translate-y-0.5 rotate-90 text-orange-500" : ""
+                  }`}
+                />
+
+                <AnimatePresence initial={false}>
+                  {isOpen && item.achievements.length > 0 && (
+                    <motion.div
+                      key="achievements"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3, ease: EXPO_OUT }}
+                      className="mt-4 space-y-1.5 overflow-hidden border-t border-zinc-800 pt-4"
+                    >
+                      {item.achievements.slice(0, 3).map((ach, aIdx) => (
+                        <p key={aIdx} className="text-xs leading-relaxed text-zinc-400">
+                          • {ach}
+                        </p>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
-            ))}
-          </motion.div>
-
-        </div>
-
+            );
+          })}
+        </motion.div>
       </div>
     </section>
   );
 }
-

@@ -10,6 +10,15 @@ export interface GlobeMarker {
   color?: [number, number, number];
 }
 
+// ⬅️ Default values sebagai konstanta modul — reference stabil, bukan dibikin ulang tiap kali
+// fungsi Globe() jalan (default parameter literal di JS itu re-created tiap call).
+const DEFAULT_MARKERS: GlobeMarker[] = [
+  { location: [-6.9175, 107.6191], size: 0.09, color: [0.98, 0.45, 0.08] },
+];
+const DEFAULT_BASE_COLOR: [number, number, number] = [0.6, 0.6, 0.65];
+const DEFAULT_GLOW_COLOR: [number, number, number] = [0.25, 0.25, 0.3];
+const DEFAULT_MARKER_COLOR: [number, number, number] = [0.98, 0.45, 0.08];
+
 interface GlobeProps {
   className?: string;
   markers?: GlobeMarker[];
@@ -24,14 +33,10 @@ interface GlobeProps {
 
 export default function Globe({
   className = "",
-  markers = [
-    { location: [-6.9175, 107.6191], size: 0.09, color: [0.98, 0.45, 0.08] }, // Bandung, Indonesia (Orange)
-    { location: [46.8139, -71.208], size: 0.06, color: [1, 1, 1] },           // Canada/North America (White)
-    { location: [1.3521, 103.8198], size: 0.05, color: [0.98, 0.45, 0.08] },  // Southeast Asia
-  ],
-  baseColor = [0.6, 0.6, 0.65], // High-contrast light gray dot-matrix continents
-  glowColor = [0.25, 0.25, 0.3],
-  markerColor = [0.98, 0.45, 0.08],
+  markers = DEFAULT_MARKERS,
+  baseColor = DEFAULT_BASE_COLOR,
+  glowColor = DEFAULT_GLOW_COLOR,
+  markerColor = DEFAULT_MARKER_COLOR,
   scale = 1.1,
   autoRotateSpeed = 0.003,
   initialPhi = 1.5,
@@ -39,6 +44,7 @@ export default function Globe({
 }: GlobeProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [mounted, setMounted] = useState(false);
+  const isVisibleRef = useRef(true);
 
   // Interaction refs
   const isDraggingRef = useRef(false);
@@ -53,11 +59,17 @@ export default function Globe({
     setMounted(true);
   }, []);
 
+  // ⬅️ Safety net kedua: bandingkan ISI props (bukan reference) via string key.
+  // Kalau reference berubah tapi isinya sama persis, effect di bawah nggak akan reinit globe.
+  const configKey = JSON.stringify({ markers, baseColor, glowColor, markerColor, scale, autoRotateSpeed });
+
   useEffect(() => {
     if (!mounted) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    // Cap devicePixelRatio; render resolution is width * dpr ONLY (not doubled again)
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     let width = canvas.offsetWidth || 340;
 
     const onResize = () => {
@@ -68,19 +80,28 @@ export default function Globe({
     window.addEventListener("resize", onResize);
     onResize();
 
+    // Pause the render loop when the globe scrolls out of view
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisibleRef.current = entry.isIntersecting;
+      },
+      { threshold: 0.05 }
+    );
+    observer.observe(canvas);
+
     let globe: ReturnType<typeof createGlobe> | null = null;
     let animId: number | null = null;
 
     try {
       globe = createGlobe(canvas, {
-        devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
-        width: width * 2,
-        height: width * 2,
+        devicePixelRatio: dpr,
+        width: width * dpr,
+        height: width * dpr,
         phi: phiRef.current,
         theta: thetaRef.current,
         dark: 1,
         diffuse: 2.2, // Bright diffuse lighting so continents & island dots are clearly visible everywhere
-        mapSamples: 20000, // High-density dot-matrix
+        mapSamples: 9000, // Reduced density — same visual read, much lighter to render
         mapBrightness: 8,
         baseColor: baseColor,
         markerColor: markerColor,
@@ -90,22 +111,24 @@ export default function Globe({
       });
 
       const render = () => {
-        if (!isDraggingRef.current) {
-          phiRef.current += autoRotateSpeed + velocityPhiRef.current;
-          thetaRef.current = Math.max(-0.8, Math.min(0.8, thetaRef.current + velocityThetaRef.current));
+        if (isVisibleRef.current) {
+          if (!isDraggingRef.current) {
+            phiRef.current += autoRotateSpeed + velocityPhiRef.current;
+            thetaRef.current = Math.max(-0.8, Math.min(0.8, thetaRef.current + velocityThetaRef.current));
 
-          // Inertia decay
-          velocityPhiRef.current *= 0.94;
-          velocityThetaRef.current *= 0.94;
-        }
+            // Inertia decay
+            velocityPhiRef.current *= 0.94;
+            velocityThetaRef.current *= 0.94;
+          }
 
-        if (globe) {
-          globe.update({
-            phi: phiRef.current,
-            theta: thetaRef.current,
-            width: width * 2,
-            height: width * 2,
-          });
+          if (globe) {
+            globe.update({
+              phi: phiRef.current,
+              theta: thetaRef.current,
+              width: width * dpr,
+              height: width * dpr,
+            });
+          }
         }
 
         animId = requestAnimationFrame(render);
@@ -120,6 +143,7 @@ export default function Globe({
 
     return () => {
       window.removeEventListener("resize", onResize);
+      observer.disconnect();
       if (animId !== null) {
         cancelAnimationFrame(animId);
       }
@@ -127,7 +151,7 @@ export default function Globe({
         globe.destroy();
       }
     };
-  }, [mounted, baseColor, glowColor, markerColor, markers, scale, autoRotateSpeed]);
+  }, [mounted, configKey]);
 
   return (
     <motion.div
